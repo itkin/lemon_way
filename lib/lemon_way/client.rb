@@ -72,18 +72,23 @@ module LemonWay
     end
 
     def query(method, attrs={})
-      http          = Net::HTTP.new(@uri.host, @uri.port)
-      http.use_ssl  = true if @uri.port == 443
+      begin
+        http          = Net::HTTP.new(@uri.host, @uri.port)
+        http.use_ssl  = true if @uri.port == 443
 
-      req           = Net::HTTP::Post.new(@uri.request_uri)
-      req.body      = make_body(method, attrs)
-      req.add_field 'Content-type', 'text/xml; charset=utf-8'
+        req           = Net::HTTP::Post.new(@uri.request_uri)
+        req.body      = make_body(method, attrs)
+        req.add_field 'Content-type', 'text/xml; charset=utf-8'
 
-      response = http.request(req).read_body
+        response = http.request(req).read_body
 
-      with_custom_parser_options do
-        response = Hash.from_xml(response)["Envelope"]['Body']["#{method}Response"]["#{method}Result"]
-        response = Hash.from_xml(response).with_indifferent_access.underscore_keys(true)
+        with_custom_parser_options do
+          response = Hash.from_xml(response)["Envelope"]['Body']["#{method}Response"]["#{method}Result"]
+          response = Hash.from_xml(response).with_indifferent_access.underscore_keys(true)
+        end
+
+      rescue Exception => e
+        raise Error, [e.message, response].join("\n\n")
       end
 
       if response.has_key?("e")
@@ -93,6 +98,7 @@ module LemonWay
       else
         response
       end
+
     end
 
     # quickly retreat date and big decimal potential attributes
