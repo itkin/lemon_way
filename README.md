@@ -1,4 +1,8 @@
-__Caution : Still under developpement and subject to changes__ 
+#DEPRECATED
+
+_This repo is **not maintained anymore**, for an up to date version please refer to https://github.com/itkin/lemonway
+
+
 # LemonWay
 
 Ruby API client to query LemonWay
